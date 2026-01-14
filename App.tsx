@@ -4,6 +4,7 @@ import GameMap from './components/GameMap';
 import TaskList from './components/TaskList';
 import RewardModal from './components/RewardModal';
 import StoryOverlay from './components/StoryOverlay';
+import LoreJournal from './components/LoreJournal';
 import { Task, TaskFrequency, GameState } from './types';
 import { ARMOR_SETS, TILES_PER_CHEST } from './constants';
 import { getKnightFlavorText, getNextStoryFragment } from './services/geminiService';
@@ -32,6 +33,7 @@ const App: React.FC = () => {
   const [flavorText, setFlavorText] = useState("The first page of your journal is blank...");
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [currentStoryFragment, setCurrentStoryFragment] = useState<string | null>(null);
+  const [isLoreOpen, setIsLoreOpen] = useState(false);
   const [isGeneratingStory, setIsGeneratingStory] = useState(false);
 
   useEffect(() => {
@@ -141,7 +143,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0d0d0d] text-[#e3d5c1] flex justify-center p-4">
-      <div className="w-full max-w-2xl space-y-8">
+      <div className="w-full max-w-2xl space-y-8 pb-20">
         
         <div className="relative shadow-[0_0_50px_rgba(0,0,0,1)] border-8 border-[#3d2b1f] overflow-hidden">
           <GameMap 
@@ -151,7 +153,7 @@ const App: React.FC = () => {
           />
           {isGeneratingStory && (
             <div className="absolute top-0 left-0 w-full h-full bg-black/40 flex items-center justify-center z-[100] backdrop-blur-[2px]">
-              <div className="pixel-font text-[10px] text-white animate-pulse">Consulting the Ancients...</div>
+              <div className="pixel-font text-[10px] text-white animate-pulse">Etching History...</div>
             </div>
           )}
         </div>
@@ -161,8 +163,16 @@ const App: React.FC = () => {
             <h2 className="pixel-font text-xl text-yellow-600 drop-shadow-lg tracking-widest uppercase">
               Quest Journal
             </h2>
-            <div className="pixel-font text-[10px] text-gray-500">
-              {tasks.filter(t => t.completed).length}/{tasks.length} CLEAR
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => setIsLoreOpen(true)}
+                className="bg-[#3d2b1f] hover:bg-[#5d4037] text-white px-3 py-1.5 border-2 border-black pixel-font text-[8px] flex items-center gap-2 transition-all shadow-[2px_2px_0_0_#000]"
+              >
+                <span>📜</span> CHRONICLE
+              </button>
+              <div className="pixel-font text-[10px] text-gray-500">
+                {tasks.filter(t => t.completed).length}/{tasks.length} CLEAR
+              </div>
             </div>
           </div>
           
@@ -186,6 +196,13 @@ const App: React.FC = () => {
           <StoryOverlay 
             fragment={currentStoryFragment} 
             onClose={() => setCurrentStoryFragment(null)} 
+          />
+        )}
+
+        {isLoreOpen && (
+          <LoreJournal 
+            history={gameState.storyHistory} 
+            onClose={() => setIsLoreOpen(false)} 
           />
         )}
 

@@ -14,13 +14,17 @@ const App: React.FC = () => {
   const STATE_KEY = 'knight_quest_state_v3';
 
   const [tasks, setTasks] = useState<Task[]>(() => {
-    const saved = localStorage.getItem(TASKS_KEY);
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem(TASKS_KEY);
+      return saved && saved !== 'undefined' ? JSON.parse(saved) : [];
+    } catch (e) {
+      console.error("Failed to load tasks", e);
+      return [];
+    }
   });
 
   const [gameState, setGameState] = useState<GameState>(() => {
-    const saved = localStorage.getItem(STATE_KEY);
-    return saved ? JSON.parse(saved) : {
+    const defaultState: GameState = {
       completedTaskCount: 0,
       level: 0,
       totalPower: 10,
@@ -28,6 +32,13 @@ const App: React.FC = () => {
       storyHistory: [],
       lastStoryStep: 0
     };
+    try {
+      const saved = localStorage.getItem(STATE_KEY);
+      return saved && saved !== 'undefined' ? JSON.parse(saved) : defaultState;
+    } catch (e) {
+      console.error("Failed to load game state", e);
+      return defaultState;
+    }
   });
 
   const [flavorText, setFlavorText] = useState("The first page of your journal is blank...");
@@ -67,7 +78,6 @@ const App: React.FC = () => {
   }, [gameState.level, refreshFlavor]);
 
   const triggerStory = async (newTotalSteps: number) => {
-    // Trigger every 4 steps
     const storyCount = Math.floor(newTotalSteps / 4);
     const previousStoryCount = Math.floor(gameState.lastStoryStep / 4);
 
@@ -132,7 +142,6 @@ const App: React.FC = () => {
         totalPower: newPower
       }));
 
-      // Trigger story logic
       await triggerStory(newCount);
     }
   };
